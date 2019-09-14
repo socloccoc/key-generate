@@ -6,6 +6,20 @@
             {{--<div class="row justify-content-center">--}}
             <div class="col-md-12">
                 @include('errors.errorlist')
+                <form method="GET" action="{{ route('key.index') }}">
+                    <div class="col-sm-12 form-row" style="border: 1px solid #cccccc; padding: 15px; margin-bottom: 20px; border-radius: 10px;">
+                        <div class="form-group col-sm-3" style="padding: 0px">
+                            <label for="app">Status</label>
+                            <select id="app" name="status" class="form-control form-inline">
+                                <option {{ isset($status) && $status == 0 ? 'selected' : '' }} value="0">Chưa được dùng</option>
+                                <option {{ isset($status) && $status == 1 ? 'selected' : '' }} value="1">Đã được dùng</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <button style="margin-top: 32px" type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        </div>
+                    </div>
+                </form>
                 <table id="example" class="table table-striped table-bordered nowrap" style="width:100%">
                     <thead>
                     <tr>

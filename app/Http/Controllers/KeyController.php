@@ -28,10 +28,19 @@ class KeyController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $keys = AppDetail::with('app')->where('serial_number', '!=', null)->get();
-        return view('key.index', compact('keys'));
+        $status = isset($request->status) ? $request->status : 1;
+        $keys = AppDetail::with('app')
+            ->where(function ($query) use ($status) {
+                if ($status == 1) {
+                    $query->where('serial_number', '!=', null);
+                }else{
+                    $query->where('serial_number', '=', null);
+                }
+            })
+            ->get();
+        return view('key.index', compact('keys', 'status'));
     }
 
     public function updateExpireDate(Request $request)
