@@ -42,11 +42,13 @@
                             <td>{{ isset($key['expire_date']) ? $key['expire_date'] : '' }}</td>
                             <td>{{ isset($key['point']) ? $key['point'] : '' }}</td>
                             <td>
-                                <a href="#" class="btn btn-info btn-lg loadModal"
-                                   key_id="{{ isset($key['id']) ? $key['id'] : '' }}" data-toggle="modal"
-                                   data-target="#updateExpireTimeModal">
-                                    <span class="glyphicon glyphicon-edit"></span> Edit
-                                </a>
+                                @if($key['expire_date'] != '')
+                                    <a href="#" class="btn btn-info btn-lg loadModal"
+                                       key_id="{{ isset($key['id']) ? $key['id'] : '' }}" data-toggle="modal"
+                                       data-target="#updateExpireTimeModal">
+                                        <span class="glyphicon glyphicon-edit"></span> Edit
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty
