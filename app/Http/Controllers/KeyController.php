@@ -34,9 +34,9 @@ class KeyController extends Controller
         $keys = AppDetail::with('app')
             ->where(function ($query) use ($status) {
                 if ($status == 1) {
-                    $query->where('serial_number', '!=', null);
-                }else{
-                    $query->where('serial_number', '=', null);
+                    $query->where('expire_date', '!=', null);
+                } else {
+                    $query->where('expire_date', '=', null);
                 }
             })
             ->get();
@@ -52,8 +52,9 @@ class KeyController extends Controller
         ], []);
         try {
             $data = [
-                'expire_date' => $request->expire_date,
-                'point'       => $request->point,
+                'expire_date'   => $request->expire_date,
+                'point'         => $request->point,
+                'serial_number' => $request->serial_number,
             ];
             $key = AppDetail::where('id', $request->modal_key_id)->limit(1)->update($data);
             if ($key) {

@@ -13,7 +13,7 @@ class AjaxController extends Controller
     {
         if (Request::ajax()) {
             $keyId = Request::get('keyId');
-            return AppDetail::where('id', $keyId)->select('id', 'expire_date', 'point')->first();
+            return AppDetail::where('id', $keyId)->select('app_details.*')->first();
         }
     }
 

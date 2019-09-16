@@ -87,6 +87,10 @@
                             <input type="number" class="form-control modal-key-id" hidden name="modal_key_id">
                         </div>
                         <div class="form-group">
+                            <label for="serial_number">Serial</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number">
+                        </div>
+                        <div class="form-group">
                             <label for="Point">Point</label>
                             <input type="number" class="form-control" id="point" name="point">
                         </div>
@@ -121,10 +125,10 @@
                             data: {_token: CSRF_TOKEN, keyId: key_id},
                             dataType: 'JSON',
                             success: function (data) {
-                                console.log(data);
                                 if (data !== null) {
                                     $('#expire_date').val(data.expire_date);
                                     $('#point').val(data.point);
+                                    $('#serial_number').val(data.serial_number);
                                     $('.modal-key-id').val(data.id);
                                 }
                             }
