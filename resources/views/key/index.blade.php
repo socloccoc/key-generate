@@ -31,6 +31,7 @@
                         <th>Expire Time</th>
                         <th>Expire Date</th>
                         <th>Point</th>
+                        <th>Created At</th>
                         <th>Action</th>
                     </tr>
                     </thead>
@@ -41,8 +42,9 @@
                             <td>{{ isset($key['key']) ? $key['key'] : '' }}</td>
                             <td>{{ isset($key['serial_number']) ? $key['serial_number'] : '' }}</td>
                             <td>{{ isset($key['expire_time']) ? $key['expire_time'] : '' }}</td>
-                            <td>{{ isset($key['expire_date']) ? $key['expire_date'] : '' }}</td>
+                            <td>{{ isset($key['expire_date']) ? substr($key['expire_date'], 0, 10) : '' }}</td>
                             <td>{{ isset($key['point']) ? $key['point'] : '' }}</td>
+                            <td>{{ isset($key['created_at']) ? substr($key['created_at'], 0, 10) : '' }}</td>
                             <td>
                                 @if($key['expire_date'] != '')
                                     <a href="#" class="btn btn-info btn-lg loadModal"
@@ -118,18 +120,20 @@
 @section('javascript')
     <script>
         $(document).ready(function () {
+
             var table = $('#example').DataTable({
                 responsive: true
             });
-            new $.fn.dataTable.FixedHeader(table);
 
-            $(document).ready(function () {
+            new $.fn.dataTable.FixedHeader(table);
+            $('#example_wrapper').on('click keyup keypress', function () {
                 $('.loadModal').each(function (index, elem) {
-                    $(elem).unbind().click(function (e) {
-                        e.preventDefault();
+                    $(this).on('click', function (e) {
+                        // e.preventDefault();
                         // ajax
                         var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
                         var key_id = $(this).attr('key_id');
+                        console.log(key_id);
                         $.ajax({
                             url: '/ajax/getKeyInfo',
                             type: 'POST',
@@ -147,6 +151,30 @@
                     });
                 });
             });
+            $('.loadModal').each(function (index, elem) {
+                $(this).on('click', function (e) {
+                    // e.preventDefault();
+                    // ajax
+                    var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+                    var key_id = $(this).attr('key_id');
+                    console.log(key_id);
+                    $.ajax({
+                        url: '/ajax/getKeyInfo',
+                        type: 'POST',
+                        data: {_token: CSRF_TOKEN, keyId: key_id},
+                        dataType: 'JSON',
+                        success: function (data) {
+                            if (data !== null) {
+                                $('#expire_date').val(data.expire_date);
+                                $('#point').val(data.point);
+                                $('#serial_number').val(data.serial_number);
+                                $('.modal-key-id').val(data.id);
+                            }
+                        }
+                    });
+                });
+            });
+
         });
     </script>
 @endsection
