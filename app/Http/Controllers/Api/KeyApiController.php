@@ -48,10 +48,16 @@ class KeyApiController extends BaseApiController
         $appId = $app->id;
 
         if ($keyExist->serial_number == '') {
-            $data = [
-                'serial_number' => $request->serial_number,
-                'expire_date'   => Carbon::now()->addDays($keyExist->expire_time)->format('y-m-d H:i:s')
-            ];
+            if($keyExist->expire_date == ''){
+                $data = [
+                    'serial_number' => $request->serial_number,
+                    'expire_date'   => Carbon::now()->addDays($keyExist->expire_time)->format('y-m-d H:i:s')
+                ];
+            }else{
+                $data = [
+                    'serial_number' => $request->serial_number
+                ];
+            }
             try {
                 $updateKey = AppDetail::where('id', $keyExist->id)->where('app_id', $appId)->limit(1)->update($data);
                 if ($updateKey) {

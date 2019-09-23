@@ -35,7 +35,11 @@ class KeyController extends Controller
             ->where(function ($query) use ($status) {
                 if ($status == 1) {
                     $query->where('expire_date', '!=', null);
-                } else {
+                } elseif ($status == 2){
+                    $query->where('expire_date', '>=', Carbon::now()->format('Y-m-d H:i:s'));
+                } elseif ($status == 3){
+                    $query->where('expire_date', '<', Carbon::now()->format('Y-m-d H:i:s'));
+                }else {
                     $query->where('expire_date', '=', null);
                 }
             })
@@ -63,7 +67,7 @@ class KeyController extends Controller
                 return redirect('/key')->with('error_message', 'Cập nhật expire_date thất bại !');
             }
         } catch (\Exception $ex) {
-            return redirect('/key')->with('error_message', $ex);
+            return redirect('/key')->with('error_message', $ex->getMessage());
         }
     }
 
@@ -120,7 +124,25 @@ class KeyController extends Controller
             $excel = Excel::download($dataExcel, "key-gen-" . Carbon::now()->format('Y-m-d-his') . ".xlsx");
             return $excel;
         } catch (\Exception $ex) {
-            return redirect('key/create')->with('error_message', $ex);
+            return redirect('key/create')->with('error_message', $ex->getMessage());
+        }
+    }
+
+    /**
+     * delete a key ( update expire_date to current datetime )
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function deleteKey($id) {
+        try {
+            $key = AppDetail::where('id', $id)->limit(1)->update(['expire_date' => Carbon::now()->subHour()->format('Y-m-d H:i:s')]);
+            if ($key) {
+                return redirect('/key')->with('message', 'Xóa Key thành công !');
+            } else {
+                return redirect('/key')->with('error_message', 'Xóa Key thất bại !');
+            }
+        } catch (\Exception $ex) {
+            return redirect('key')->with('error_message', $ex->getMessage());
         }
     }
 

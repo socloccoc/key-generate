@@ -13,6 +13,8 @@
                             <select id="app" name="status" class="form-control form-inline">
                                 <option {{ isset($status) && $status == 0 ? 'selected' : '' }} value="0">Chưa được dùng</option>
                                 <option {{ isset($status) && $status == 1 ? 'selected' : '' }} value="1">Đã được dùng</option>
+                                <option {{ isset($status) && $status == 2 ? 'selected' : '' }} value="2">Còn hạn</option>
+                                <option {{ isset($status) && $status == 3 ? 'selected' : '' }} value="3">Hết hạn</option>
                             </select>
                         </div>
                         <div class="col-sm-3">
@@ -47,6 +49,13 @@
                                        key_id="{{ isset($key['id']) ? $key['id'] : '' }}" data-toggle="modal"
                                        data-target="#updateExpireTimeModal">
                                         <span class="glyphicon glyphicon-edit"></span> Edit
+                                    </a>
+                                @endif
+                                @if($key['expire_date'] >= \Carbon\Carbon::now()->format('Y-m-d H:i:s'))
+                                    <a onclick="return confirm('Bạn có chắc chắn muốn xóa không ?')"
+                                       class="btn btn-danger btn-lg"
+                                       href="{{ route('key.deleteKey', ['id' => $key['id']]) }}">
+                                        <span class="glyphicon glyphicon-trash"></span> Remove
                                     </a>
                                 @endif
                             </td>

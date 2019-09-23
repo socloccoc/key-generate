@@ -18,16 +18,21 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::group(['middleware' => 'auth'], function() {
+    Route::resource('app', 'AppController');
 
-Route::resource('app', 'AppController');
+    Route::resource('key', 'KeyController');
 
-Route::resource('key', 'KeyController');
+    Route::get('deleteKey/{id}', [
+        'as'   => 'key.deleteKey',
+        'uses' => 'KeyController@deleteKey'
+    ]);
 
-Route::post('updateExpireDate', [
-    'as' => 'key.updateExpireDate',
-    'uses' => 'KeyController@updateExpireDate'
-]);
-
+    Route::post('updateExpireDate', [
+        'as'   => 'key.updateExpireDate',
+        'uses' => 'KeyController@updateExpireDate'
+    ]);
+});
 Route::match(['get', 'post'], 'register', function(){
     return redirect('/login');
 });
