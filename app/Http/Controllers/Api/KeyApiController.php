@@ -83,6 +83,10 @@ class KeyApiController extends BaseApiController
 
     public function getPointByKey($key)
     {
+        $keyExpired = $this->checkKeyExpired($key);
+        if($keyExpired){
+            return $this->sendError('Key đã hết hạn !', Response::HTTP_BAD_REQUEST);
+        }
         $key = AppDetail::where('key', $key)->first();
         if ($key) {
             return response()->json(['point' => $key->point], Response::HTTP_OK);
