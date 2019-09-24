@@ -28,9 +28,21 @@ Route::group(['namespace' => 'Api', 'prefix' => 'v1'], function () {
         'uses' => 'KeyApiController@updatePoint'
     ]);
 
+    Route::post('/addPointForKey', [
+        'as' => 'key.addPointForKey',
+        'uses' => 'KeyApiController@addPointForKey'
+    ]);
+
     Route::get('/getPointByKey/{key}', [
         'as' => 'key.getPoint',
         'uses' => 'KeyApiController@getPointByKey'
     ]);
+
+    Route::post('/validateKey', [
+        'as' => 'key.validateKey',
+        'uses' => 'KeyApiController@validateKey'
+    ]);
+
+    Route::resource('app', 'AppApiController');
 
 });

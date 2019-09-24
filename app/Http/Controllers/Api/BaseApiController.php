@@ -28,6 +28,21 @@ class BaseApiController extends Controller
     }
 
     /**
+     * success response method.
+     * @param $result
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendResponseData($result, $code)
+    {
+        $response = [
+            'success' => true,
+            'data'    => $result
+        ];
+
+        return response()->json($response, $code);
+    }
+
+    /**
      * return error response.
      *
      * @return \Illuminate\Http\Response

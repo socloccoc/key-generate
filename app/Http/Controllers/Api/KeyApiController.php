@@ -16,14 +16,14 @@ class KeyApiController extends BaseApiController
     public function checkKey(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'key' => 'required|max:9',
+            'key'           => 'required|max:9',
             'serial_number' => 'required',
-            'app_name' => 'required',
+            'app_name'      => 'required',
         ], [
-            'key.required' => 'Key không được để trống',
-            'key.max' => 'Key không được quá 9 ký tự',
+            'key.required'           => 'Key không được để trống',
+            'key.max'                => 'Key không được quá 9 ký tự',
             'serial_number.required' => 'Serial Number không được để trống',
-            'app_name.required' => 'App Name không được để trống',
+            'app_name.required'      => 'App Name không được để trống',
         ]);
 
         if ($validator->fails()) {
@@ -41,19 +41,19 @@ class KeyApiController extends BaseApiController
         // check app_name
         $appName = $request->app_name;
         $app = App::where('name', $appName)->first();
-        if(!$app){
+        if (!$app) {
             return $this->sendError('App không tồn tại !', Response::HTTP_NOT_FOUND);
         }
 
         $appId = $app->id;
 
         if ($keyExist->serial_number == '') {
-            if($keyExist->expire_date == ''){
+            if ($keyExist->expire_date == '') {
                 $data = [
                     'serial_number' => $request->serial_number,
                     'expire_date'   => Carbon::now()->addDays($keyExist->expire_time)->format('y-m-d H:i:s')
                 ];
-            }else{
+            } else {
                 $data = [
                     'serial_number' => $request->serial_number
                 ];
@@ -81,20 +81,22 @@ class KeyApiController extends BaseApiController
 
     }
 
-    public function getPointByKey($key){
+    public function getPointByKey($key)
+    {
         $key = AppDetail::where('key', $key)->first();
-        if($key){
+        if ($key) {
             return response()->json(['point' => $key->point], Response::HTTP_OK);
         }
         return $this->sendError('Key không hợp lệ !', Response::HTTP_BAD_REQUEST);
     }
 
-    public function updatePoint(Request $request){
+    public function updatePoint(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'key' => 'required|max:9',
         ], [
             'key.required' => 'Key không được để trống',
-            'key.max' => 'Key không được quá 9 ký tự',
+            'key.max'      => 'Key không được quá 9 ký tự',
         ]);
 
         if ($validator->fails()) {
@@ -135,5 +137,101 @@ class KeyApiController extends BaseApiController
             return true;
         }
         return false;
+    }
+
+    /**
+     * check key has not been used
+     * @param $key
+     * @param $appId
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function validateKey(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'key'    => 'required|max:9',
+            'app_id' => 'required',
+        ], [
+            'key.required'    => 'Key không được để trống',
+            'key.max'         => 'Key không được quá 9 ký tự',
+            'app_id.required' => 'App không được để trống',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors()->first(), Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $app = App::where('id', $request->app_id)->first();
+            if (!$app) {
+                return $this->sendError('Key không tồn tại hoặc đã được sử dụng', Response::HTTP_NOT_FOUND);
+            }
+            $key = AppDetail::where('app_id', $request->app_id)->where('key', $request->key)->where('serial_number', null)->first();
+            if ($key) {
+                return $this->sendResponse($key);
+            }
+            return $this->sendError('( ' . $app['name'] . ' ) Key không tồn tại hoặc đã được sử dụng', Response::HTTP_NOT_FOUND);
+        } catch (\Exception $ex) {
+            return $this->sendError($ex->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * add point for the key
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function addPointForKey(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'key'   => 'required|max:9',
+            'point' => 'required|integer',
+        ], [
+            'key.required'   => 'Key không được để trống',
+            'key.max'        => 'Key không được quá 9 ký tự',
+            'point.required' => 'point không được để trống',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError($validator->errors()->first(), Response::HTTP_BAD_REQUEST);
+        }
+
+        $key = $request->key;
+
+        $keyExist = AppDetail::where('key', $key)->first();
+        if (!$keyExist) {
+            return $this->sendError('Key không hợp lệ !', Response::HTTP_BAD_REQUEST);
+        }
+
+        $keyExpired = $this->checkKeyExpired($key);
+        if ($keyExpired) {
+            return $this->sendError('Key đã hết hạn !', Response::HTTP_BAD_REQUEST);
+        }
+        try {
+            $point = $request->point + $keyExist['point'];
+            $updateKey = AppDetail::where('key', $key)->limit(1)->update(['point' => $point]);
+            if ($updateKey) {
+                return $this->sendResponse($updateKey);
+            }
+        } catch (\Exception $ex) {
+            return $this->sendError($ex->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * check key expired
+     * @param $key
+     * @return bool
+     */
+    public function checkKeyExpired($key)
+    {
+        try {
+            $app = AppDetail::where('key', $key)->where('expire_date', '<', Carbon::now()->format('Y-m-d H:i:s'))->first();
+            if ($app) {
+                return true;
+            }
+            return false;
+        } catch (\Exception $ex) {
+            return false;
+        }
     }
 }
